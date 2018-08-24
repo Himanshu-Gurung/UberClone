@@ -1,0 +1,7 @@
+{
+  "name": "taproute",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "ionic-angular"
+}

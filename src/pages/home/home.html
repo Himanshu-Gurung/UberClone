@@ -1,0 +1,142 @@
+<ion-content>
+  <div id="{{ mapId }}" [ngStyle]="{height: '85%'}"></div>
+  <div class="map-overlay">
+    <div style="top:0; right: 0; padding: 4px;">
+        <button ion-button (click)="goProfilePage()"><ion-icon name="contact"></ion-icon></button>
+    </div>
+  </div>
+
+  <div class="align-bottom">
+<!--       <ion-grid class="common-bg" [hidden]="!destination">
+          <ion-row>
+            <ion-col (click)="choosePaymentMethod1()">
+              <ion-icon name="ios-cash-outline" color="gray"></ion-icon>
+              <span ion-text color="gray">{{ getPaymentMethod() }}</span>
+            </ion-col>
+            <ion-col (click)="showPromoPopup()" *ngIf="destination">
+              <ion-icon name="ios-create-outline" color="gray"></ion-icon>
+              <span ion-text color="gray">{{'PROMO' | translate}}</span>
+            </ion-col>
+            <ion-col (click)="showNotePopup()">
+              <ion-icon name="ios-create-outline" color="gray"></ion-icon>
+              <span ion-text color="gray">{{'NOTE' | translate}}</span>
+            </ion-col>
+          </ion-row>
+        </ion-grid>  --> 
+    <ion-list no-lines>
+      <ion-item>
+        <ion-input disabled type="text" value="{{origin ? origin.vicinity : '' }}"></ion-input>
+        <button item-right (click)="chooseOrigin()"><ion-icon name="search" class="search-icon"></ion-icon></button>
+      </ion-item>
+      <ion-item>
+        <ion-input disabled type="text" placeholder="where you want to go?" value="{{ destination ? destination.vicinity : '' }}"></ion-input>
+        <button item-right (click)="chooseDestination()"><ion-icon name="search" class="search-icon"></ion-icon></button>
+      </ion-item>
+    </ion-list>
+    <ion-row>
+      <ion-col *ngIf="distanceText!=''" ><ion-icon name="plane"></ion-icon><b>{{ distanceText }}</b></ion-col>
+      <ion-col *ngIf="durationText!=''"><ion-icon name="time"></ion-icon><b>{{durationText}}</b></ion-col>
+    </ion-row>
+    <ion-row [hidden]="!destination">
+      <ion-col *ngFor="let vehicle of vehicles; let i = index" [ngClass]="{'active': vehicle.active}" (click)="chooseVehicle(i)">
+          <img src="{{ vehicle.icon }}">
+          <p>{{ vehicle.name }} ( {{currency }}{{ vehicle.fee }} )</p>
+      </ion-col>
+    </ion-row>
+
+    <!-- 17th August Starts -->
+    <div [hidden]="ui_state!='NO_TRIP_DETAILS'">NO_TRIP_DETAILS</div>
+    <ion-list class="summary" [hidden]="ui_state!='TRIP_DETAILS'"><!-- [ngClass]="{'slideUp':slideUp, 'slideDown': slideDown}" no-bounce [hidden]="ui_state!='TRIP_DETAILS'" -->
+      <section>
+        <ul class="route">
+          <li>
+            <div>
+              <div>
+              <span><img src="assets/img/auto.png"></span>
+              <span>PICKUP</span>
+              </div>
+              <div>
+                <li>{{request_doc.origin?request_doc.origin.vicinity:'loading...'}}</li>
+                <li>{{request_doc.first_mile_metro_details?(request_doc.first_mile_metro_details.vicinity): 'no metro found nearby'}}</li>
+              </div>
+              <div><b><!-- {{request_doc.first_mile_duration.text}} --></b><br> mins</div>
+            </div>
+            <div><div><span class="rs"></span><b *ngIf="this.mode_active == 'solo'">{{request_doc.first_mile_solo_fare?request_doc.first_mile_solo_fare:0}}</b><b *ngIf="this.mode_active == 'share'">{{request_doc.first_mile_share_fare?request_doc.first_mile_share_fare:0}}</b></div><div style="text-transform: uppercase">{{this.mode_active}}</div></div>
+          </li>
+          <li>
+            <div>
+              <div>
+                <span><img src="assets/img/transit.png"></span>
+                <span>TRANSIT</span>
+              </div>
+              <div>
+                <li>{{request_doc.transit_lines_text}}</li>
+                <li>{{request_doc.transit_stops}} stops</li>
+              </div>
+              <div><b>{{request_doc.transit_duration_number}}</b><br> {{request_doc.transit_duration_text}}</div>
+            </div>
+            <div><div><span class="rs white"></span><b>{{request_doc.metro_fare?request_doc.metro_fare:0}}</b></div><div>CARD</div></div>
+          </li>
+          <li>
+            <div>
+              <div><span><img src="assets/img/auto.png"></span><span>DROPOFF</span></div>
+              <div>
+                <li>{{request_doc.last_mile_metro_details?( request_doc.last_mile_metro_details.vicinity): 'no metro found near by'}}</li>
+                <li>{{request_doc.destination?(request_doc.destination.vicinity):('please choose a desination')}}</li>
+              </div>
+              <div><b><!--{{request_doc.last_mile_duration?request_doc.last_mile_duration:0}} --></b><br> mins</div>
+            </div>
+            <div><div><span class="rs"></span><b *ngIf="this.mode_active == 'solo'">{{(request_doc.last_mile_solo_fare)?request_doc.last_mile_solo_fare:0}}</b><b *ngIf="this.mode_active == 'share'">{{(request_doc.last_mile_share_fare)?request_doc.last_mile_share_fare:0}}</b></div><div style="text-transform: uppercase">{{this.mode_active}}</div></div>
+          </li>
+        </ul>
+        <ul class="aaa">
+          <li>
+            <div>
+              <div>ARRIVAL TIME</div>
+              <span class="clock"></span>
+            </div>
+            <div><b>{{request_doc.destination_end_time_text}}</b></div>
+          </li>
+          <li>
+            <div>
+              <div>TOTAL FARE</div>
+              <span class="rs rs-circle"></span>
+            </div>
+            <div><b *ngIf="this.mode_active == 'solo'"><span class="rs-small white"></span>{{ request_doc.total_solo_fare }}</b> <b *ngIf="this.mode_active == 'share'"><span class="rs-small white"></span>{{ request_doc.total_share_fare }}</b></div>
+          </li>
+        </ul>
+      </section>
+      <header>
+        <div class="heading">{{ (mile_active=="done")? 'Trip Summary': 'Confirm your trip'}}</div>
+        <div (click)="cancelRequest()">+</div> <!-- *ngIf="mile_active=='none'" -->
+      </header>
+    </ion-list>
+    <!-- 17th August Ends -->
+
+ <ion-list class="booking-info" [ngClass]="{'show_driver':show_driver}" no-bounce>
+      <ion-list class="pane" no-bounce>
+        <ion-list>
+          <ion-grid no-padding>
+            <div class="btn_main" id="button" (click)="submitWithDestination()">
+              <a href="#" class="fancy-button bg-gradient2" [ngClass]="{'search': (!destination),'go': flag && !request_confirmed }"><span></span></a>
+            </div>
+            <ion-row class="vehicles" text-center>
+              <ion-col class="solo" [ngClass]="{'mode_active': (mode_active == 'solo'), 'mode_inactive': !(mode_active == 'solo') }" (click)="enableSolo()">
+                <img class="solo-picture" src="assets/img/solo.png">
+                <span class="solo-text">SOLO</span> 
+              </ion-col>
+              <ion-col class="share" [ngClass]="{'mode_active': (mode_active == 'share'), 'mode_inactive': !(mode_active == 'share') }" (click)="enableShare()">
+                <span class="share-text">SHARE</span>
+                <img class="share-picture" src="assets/img/share.png">
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-list>
+      </ion-list>
+    </ion-list> 
+
+    <button ion-button block color="primary" (click)="submitWithDestination()">Book Ride</button>
+<!--  <button ion-button block color="primary" [hidden]="destination" (click)="chooseDestination()">{{'RIDE_NOW' | translate}}</button>
+    <button ion-button block color="primary" [hidden]="!destination" (click)="book()">{{ locateDriver == false ? 'RIDE NOW':'Locating Drivers'}} <ion-spinner name="dots" color="light" [hidden]="!locateDriver"></ion-spinner></button>  -->
+  </div>
+</ion-content>
